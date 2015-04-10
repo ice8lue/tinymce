@@ -1414,11 +1414,12 @@ define("tinymce/util/Quirks", [
 		 */
 		function touchClickEvent() {
 			editor.on('touchstart', function(e) {
-				var elm, time, startTouch, changedTouches;
+				var elm, time, startTouch, changedTouches, scrollPos;
 
 				elm = e.target;
 				time = new Date().getTime();
 				changedTouches = e.changedTouches;
+				scrollPos = window.scrollY;
 
 				if (!changedTouches || changedTouches.length > 1) {
 					return;
@@ -1438,6 +1439,10 @@ define("tinymce/util/Quirks", [
 					}
 
 					if (Math.abs(startTouch.clientY - endTouch.clientY) > 5) {
+						return;
+					}
+
+					if (Math.abs(scrollPos - window.scrollY) > 5) {
 						return;
 					}
 
