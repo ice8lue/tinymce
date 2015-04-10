@@ -138,9 +138,9 @@ define("tinymce/Editor", [
 			inline_styles: true,
 			convert_fonts_to_spans: true,
 			indent: 'simple',
-			indent_before: 'p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,ul,ol,li,dl,dt,dd,area,table,thead,' +
+			indent_before: 'p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,th,ul,ol,li,dl,dt,dd,area,table,thead,' +
 				'tfoot,tbody,tr,section,article,hgroup,aside,figure,option,optgroup,datalist',
-			indent_after: 'p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,ul,ol,li,dl,dt,dd,area,table,thead,' +
+			indent_after: 'p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,th,ul,ol,li,dl,dt,dd,area,table,thead,' +
 				'tfoot,tbody,tr,section,article,hgroup,aside,figure,option,optgroup,datalist',
 			validate: true,
 			entity_encoding: 'named',
@@ -477,6 +477,7 @@ define("tinymce/Editor", [
 			var self = this, settings = self.settings, elm = self.getElement();
 			var w, h, minHeight, n, o, Theme, url, bodyId, bodyClass, re, i, initializedPlugins = [];
 
+			this.editorManager.i18n.setCode(settings.language);
 			self.rtl = this.editorManager.i18n.rtl;
 			self.editorManager.add(self);
 
@@ -1842,10 +1843,11 @@ define("tinymce/Editor", [
 		},
 
 		/**
-		 * Returns the iframes body element.
+		 * Returns the root element of the editable area.
+		 * For a non-inline iframe-based editor, returns the iframe's body element.
 		 *
 		 * @method getBody
-		 * @return {Element} Iframe body element.
+		 * @return {Element} The root element of the editable area.
 		 */
 		getBody: function() {
 			return this.bodyElement || this.getDoc().body;

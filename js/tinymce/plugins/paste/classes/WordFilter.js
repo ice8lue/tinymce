@@ -62,7 +62,7 @@ define("tinymce/pasteplugin/WordFilter", [
 	}
 
 	function isBulletList(text) {
-		return /^[\s\u00a0]*[\u2022\u00b7\u00a7\u00d8\u25CF]\s*/.test(text);
+		return /^[\s\u00a0]*[\u2022\u00b7\u00a7\u25CF]\s*/.test(text);
 	}
 
 	function WordFilter(editor) {
@@ -70,6 +70,10 @@ define("tinymce/pasteplugin/WordFilter", [
 
 		editor.on('BeforePastePreProcess', function(e) {
 			var content = e.content, retainStyleProperties, validStyles;
+
+			// Remove google docs internal guid markers
+			content = content.replace(/<b[^>]+id="?docs-internal-[^>]*>/gi, '');
+			content = content.replace(/<br class="?Apple-interchange-newline"?>/gi, '');
 
 			retainStyleProperties = settings.paste_retain_style_properties;
 			if (retainStyleProperties) {
@@ -174,7 +178,7 @@ define("tinymce/pasteplugin/WordFilter", [
 					// Remove start of list item "1. " or "&middot; " etc
 					removeIgnoredNodes(paragraphNode);
 					trimListStart(paragraphNode, /^\u00a0+/);
-					trimListStart(paragraphNode, /^\s*([\u2022\u00b7\u00a7\u00d8\u25CF]|\w+\.)/);
+					trimListStart(paragraphNode, /^\s*([\u2022\u00b7\u00a7\u25CF]|\w+\.)/);
 					trimListStart(paragraphNode, /^\u00a0+/);
 				}
 
@@ -419,7 +423,7 @@ define("tinymce/pasteplugin/WordFilter", [
 						node = nodes[i];
 
 						className = node.attr('class');
-						if (/^(MsoCommentReference|MsoCommentText|msoDel|MsoCaption)$/i.test(className)) {
+						if (/^(MsoCommentReference|MsoCommentText|msoDel)$/i.test(className)) {
 							node.remove();
 						}
 

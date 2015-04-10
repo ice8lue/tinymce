@@ -186,12 +186,12 @@ define("tinymce/Formatter", [
 
 			// BlockFormat shortcuts keys
 			for (var i = 1; i <= 6; i++) {
-				ed.addShortcut('meta+' + i, '', ['FormatBlock', false, 'h' + i]);
+				ed.addShortcut('access+' + i, '', ['FormatBlock', false, 'h' + i]);
 			}
 
-			ed.addShortcut('meta+7', '', ['FormatBlock', false, 'p']);
-			ed.addShortcut('meta+8', '', ['FormatBlock', false, 'div']);
-			ed.addShortcut('meta+9', '', ['FormatBlock', false, 'address']);
+			ed.addShortcut('access+7', '', ['FormatBlock', false, 'p']);
+			ed.addShortcut('access+8', '', ['FormatBlock', false, 'div']);
+			ed.addShortcut('access+9', '', ['FormatBlock', false, 'address']);
 		}
 
 		// Public functions
@@ -290,7 +290,7 @@ define("tinymce/Formatter", [
 				textDecoration = getTextDecoration(node.parentNode);
 				if (ed.dom.getStyle(node, 'color') && textDecoration) {
 					ed.dom.setStyle(node, 'text-decoration', textDecoration);
-				} else if (ed.dom.getStyle(node, 'textdecoration') === textDecoration) {
+				} else if (ed.dom.getStyle(node, 'text-decoration') === textDecoration) {
 					ed.dom.setStyle(node, 'text-decoration', null);
 				}
 			}
@@ -764,6 +764,11 @@ define("tinymce/Formatter", [
 				// checks for another more suitable node
 				if (isBookmarkNode(out)) {
 					out = out[start ? 'firstChild' : 'lastChild'];
+				}
+
+				// Since dom.remove removes empty text nodes then we need to try to find a better node
+				if (out.nodeType == 3 && out.data.length === 0) {
+					out = start ? node.previousSibling || node.nextSibling : node.nextSibling || node.previousSibling;
 				}
 
 				dom.remove(node, true);
@@ -2241,7 +2246,8 @@ define("tinymce/Formatter", [
 					removeCaretContainer();
 
 					// Remove caret container on keydown and it's a backspace, enter or left/right arrow keys
-					if (keyCode == 8 || keyCode == 37 || keyCode == 39) {
+					// Backspace key needs to check if the range is collapsed due to bug #6780
+					if ((keyCode == 8 && selection.isCollapsed()) || keyCode == 37 || keyCode == 39) {
 						removeCaretContainer(getParentCaretContainer(selection.getStart()));
 					}
 

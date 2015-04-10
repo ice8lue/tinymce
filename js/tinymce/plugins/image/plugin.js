@@ -153,6 +153,10 @@ tinymce.PluginManager.add('image', function(editor) {
 				data.alt = '';
 			}
 
+			if (!data.title) {
+				data.title = '';
+			}
+
 			if (data.width === '') {
 				data.width = null;
 			}
@@ -170,6 +174,7 @@ tinymce.PluginManager.add('image', function(editor) {
 			data = {
 				src: data.src,
 				alt: data.alt,
+				title: data.title,
 				width: data.width,
 				height: data.height,
 				style: data.style,
@@ -185,6 +190,10 @@ tinymce.PluginManager.add('image', function(editor) {
 					}
 
 					return;
+				}
+
+				if (data.title === "") {
+					data.title = null;
 				}
 
 				if (!imgElm) {
@@ -210,7 +219,7 @@ tinymce.PluginManager.add('image', function(editor) {
 		}
 
 		function srcChange(e) {
-			var meta = e.meta || {};
+			var srcURL, prependURL, absoluteURLPattern, meta = e.meta || {};
 
 			if (imageListCtrl) {
 				imageListCtrl.value(editor.convertURL(this.value(), 'src'));
@@ -221,16 +230,18 @@ tinymce.PluginManager.add('image', function(editor) {
 			});
 
 			if (!meta.width && !meta.height) {
-				var srcURL = this.value(),
-				absoluteURLPattern = new RegExp('^(?:[a-z]+:)?//', 'i'),
-				baseURL = editor.settings.document_base_url;
+				srcURL = editor.convertURL(this.value(), 'src');
 
-				//Pattern test the src url and make sure we haven't already prepended the url
-				if (baseURL && !absoluteURLPattern.test(srcURL) && srcURL.substring(0, baseURL.length) !== baseURL) {
-					this.value(baseURL + srcURL);
+				// Pattern test the src url and make sure we haven't already prepended the url
+				prependURL = editor.settings.image_prepend_url;
+				absoluteURLPattern = new RegExp('^(?:[a-z]+:)?//', 'i');
+				if (prependURL && !absoluteURLPattern.test(srcURL) && srcURL.substring(0, prependURL.length) !== prependURL) {
+					srcURL = prependURL + srcURL;
 				}
 
-				getImageSize(this.value(), function(data) {
+				this.value(srcURL);
+
+				getImageSize(editor.documentBaseURI.toAbsolute(this.value()), function(data) {
 					if (data.width && data.height && imageDimensions) {
 						width = data.width;
 						height = data.height;
@@ -249,6 +260,7 @@ tinymce.PluginManager.add('image', function(editor) {
 			data = {
 				src: dom.getAttrib(imgElm, 'src'),
 				alt: dom.getAttrib(imgElm, 'alt'),
+				title: dom.getAttrib(imgElm, 'title'),
 				"class": dom.getAttrib(imgElm, 'class'),
 				width: width,
 				height: height
@@ -317,6 +329,10 @@ tinymce.PluginManager.add('image', function(editor) {
 
 		if (editor.settings.image_description !== false) {
 			generalFormItems.push({name: 'alt', type: 'textbox', label: 'Image description'});
+		}
+
+		if (editor.settings.image_title) {
+			generalFormItems.push({name: 'title', type: 'textbox', label: 'Image Title'});
 		}
 
 		if (imageDimensions) {
@@ -405,7 +421,6 @@ tinymce.PluginManager.add('image', function(editor) {
 		}
 
 		function updateVSpaceHSpaceBorder() {
-
 			if (!editor.settings.image_advtab) {
 				return;
 			}
